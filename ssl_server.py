@@ -3,6 +3,9 @@ import ssl
 import os
 from dotenv import load_dotenv
 import mysql.connector
+from sql_setup import table
+
+
 class my_server:
     def __init__(self, PORT, HOST):
         # Create a standard TCP socket
@@ -25,7 +28,8 @@ class my_server:
                     print(f"Connection from {addr}")
                     data = conn.recv(1024)
                     print(f"Received: {data.decode()}")
-                    conn.sendall(b"Hello from the server!")
+                    #conn.sendall(b"Hello from the server!")
+                    self.handle_random_key(conn)
                     conn.close()
         except Exception as e:
             print(f"Error: {e}")
@@ -34,21 +38,21 @@ class my_server:
         self.message = client.recv(1024).decode()
 
     def generateRandomKey(self):
-        return os.urandom(32)
+        return os.urandom(16)
+    
+    def handle_random_key(self, client):
+        self.key = self.generateRandomKey()
+        print(f"Generated key: {self.key.hex()}")
+        self.table = table()
+        self.table.Insert_Client(client.getpeername()[0], self.key.hex())
+        self.table.Print_table()
+        client.sendall(self.key)
 
-    def SetUp_SQL(self):
-        db_user = os.getenv("DB_USER")
-        db_password = os.getenv("DB_PASSWORD")
-        database = "database_key"
-        mydb = mysql.connector.connect(
-                host="127.0.0.1",
-                user=db_user,
-                password=db_password,
-                database=database
-        )
-
-        cursor = mydb.cursor()
-        cursor.execute("CREATE TABLE keys (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) key key STRING(32))")
+    def print_table(self):
+        self.table.Print_table()  
+    def reset_all(self):
+        self.table.reset_all()
+        print("All data has been reset in the database.")  
 
 def main():
     server = my_server(12345, "127.0.0.1")

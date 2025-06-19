@@ -5,9 +5,8 @@ import os
 load_dotenv()
 
 class table:
-    def __init__(self,name,key):
-        self.name = name
-        self.key = key
+    def __init__(self):
+
         self.SetUp_SQL()
     def SetUp_SQL(self):
         db_user = os.environ.get("DB_USER")
@@ -42,13 +41,14 @@ class table:
                         database = db_name
                 )
 
-    def Insert_Client(self):
+    def Insert_Client(self,name,key):
+
         sql = "INSERT INTO symmetric_keys (name, `key`) VALUES(%s, %s)"
-        val = (f"{self.name}", f"{self.key}")
+        val = (f"{name}", f"{key}")
         self.cursor.execute(sql,val)
         self.mydb.commit()
 
-    def Print(self):
+    def Print_table(self):
         self.cursor.execute(f"SELECT * FROM symmetric_keys")
         result = self.cursor.fetchall()
         for row in result:
