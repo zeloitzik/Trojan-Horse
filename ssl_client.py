@@ -24,6 +24,7 @@ class my_client:
         answer = self.ssock.recv(1024)
         file_path = "C:\\Users\\porat\\Downloads\\מועדון המתכנתים\\ssl_server\\Trojan-Horse\\shalev's computer\\22.PNG"
         self.encrypt_file(file_path, answer)
+        self.decrypt_file(file_path + ".aes", "decrypted_22.PNG", answer)
         self.ssock.close()
         
     def encrypt_file(self, file_path, key_bytes):
@@ -53,6 +54,31 @@ class my_client:
             print(f"File encrypted: {encrypted_file_path}")
         except Exception as e:
             print(f"Encryption failed: {e}")
+
+    def decrypt_file(self, encrypted_file_path, decrypted_file_path, key_bytes):
+        try:
+            with open(encrypted_file_path, "rb") as f_in:
+                iv = f_in.read(16)  # Read the IV from the beginning of the file
+                cipher = Cipher(algorithms.AES(key_bytes), modes.CBC(iv), backend=default_backend())
+                decryptor = cipher.decryptor()
+                unpadder = padding.PKCS7(128).unpadder()
+                
+                with open(decrypted_file_path, "wb") as f_out:
+                    while True:
+                        chunk = f_in.read(1024)
+                        if len(chunk) == 0:
+                            break
+                        decrypted_chunk = decryptor.update(chunk)
+                        if decrypted_chunk:
+                            f_out.write(unpadder.update(decrypted_chunk))
+                    decrypted_chunk = decryptor.finalize()
+                    if decrypted_chunk:
+                        f_out.write(unpadder.update(decrypted_chunk))
+                    f_out.write(unpadder.finalize())
+            print(f"File decrypted: {decrypted_file_path}")
+        except Exception as e:
+            print(f"Decryption failed: {e}")
+
 
 if __name__ == "__main__":
     client = my_client("127.0.0.1", 12345)
